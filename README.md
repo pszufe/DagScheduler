@@ -25,15 +25,15 @@ plot_solution_report(g, c, γ, times, assignW, penalties, dfloads)
 
 ## Variables:
 
-- \( t_k \geq 0 \): Start time of each task \( k \), for \( k = 1, \ldots, K \).
-- \( t_{\text{last\_end}} \geq 0 \): End time of the last task.
-- \( s_{kw} \in \{0,1\} \): Binary variable that is 1 if task \( k \) is assigned to worker \( w \), for \( w = 1, \ldots, W \).
-- \( p_{kl} \geq 0 \): Penalties for moving between workers, applicable for task pairs \((k, l) \) in the set \( a_{kls \).
+- $ t_k \geq 0 $: Start time of each task $ k $, for $ k = 1, \ldots, K $.
+- $ t_{\text{last\_end}} \geq 0 $: End time of the last task.
+- $ s_{kw} \in \{0,1\} $: Binary variable that is 1 if task $ k $ is assigned to worker $ w $, for $ w = 1, \ldots, W $.
+- $ p_{kl} \geq 0 $: Penalties for moving between workers, applicable for task pairs $(k, l) $ in the set $ a_{kls $.
 
 ## Objective:
 
 Minimize the following expression:
 
-\[
+$$
 \min Z \cdot t_{\text{last\_end}} + \sum_{k=1}^K t_k + \sum_{(k,l) \in a_{kls}} p_{kl}
-\]
+$$
