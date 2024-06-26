@@ -50,7 +50,8 @@ Minimize the following expression:
 
 ```math
     t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} \leq t_l, \quad \forall (k, l) \in edges(g)
-
+```
+```math
     p_{kl} \geq (s_{kw_1} + s_{lw_2} - 1) \cdot \gamma^{(k,l)}_{w_1,w_2}, \quad \forall (k, l) \in edges(g), \forall w_1 \neq w_2
 ```
 
