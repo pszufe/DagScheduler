@@ -27,12 +27,42 @@ plot_solution_report(g, c, γ, times, assignW, penalties, dfloads)
 
 - $` t_k \geq 0 `$: Start time of each task $ k $, for $` k = 1, \ldots, K `$.
 - $` t^{*} \geq 0 `$: End time of the last task.
-- $` s_{kw} \in \{0,1\} `$: Binary variable that is 1 if task $ k $ is assigned to worker $ w $, for $` w = 1, \ldots, W `$.
-- $` p_{kl} \geq 0 `$: Penalties for moving between workers, applicable for task pairs $(k, l)$ (edges in the DAG).
+- $` s_{kw} \in \{0,1\} `$: Binary variable that is 1 if task $` k `$ is assigned to worker $` w `$, for $` w = 1, \ldots, W `$.
+- $` p_{kl} \geq 0 `$: Penalties for moving between workers, applicable for task pairs $`(k, l)`$ (edges in the DAG).
 
 ## Objective:
 
 Minimize the following expression:
 ```math
-\min Z \cdot t^{*} + \sum_{k=1}^K t_k + \sum_{(k,l) \in a_{kls}} p_{kl}
+\min Z \cdot t^{*} + \sum_{k=1}^K t_k + \sum_{(k,l) edges(g)} p_{kl}
+```
+
+
+## Constraints:
+
+1. **Assignment Constraint:** Each task is assigned to exactly one worker:
+
+```math
+    \sum_{w=1}^W s_{kw} = 1, \quad \forall k = 1, \ldots, K
+```
+
+2. **Task Timing and Penalties:**
+
+```math
+    t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} \leq t_l, \quad \forall (k, l) \in edges(g)
+    p_{kl} \geq (s_{kw1} + s_{lw2} - 1) \cdot \gamma_{klw1w2}, \quad \forall (k, l), \forall w1 \neq w2
+```
+
+
+
+3. **Last Task Timing:**
+
+```math
+    t_l + \sum_{w=1}^W c_{lw} s_{lw} \leq t_{\text{last\_end}}, \quad \forall l : \text{outdegree}(g, l) = 0
+```
+
+4. **Sequential Task Execution:** If tasks \( k \) and \( l \) share the same worker, the task \( l \) occurs after task \( k \) if not linked by \( a_{kls \):
+
+```math
+    t_k + \sum_{w=1}^W c_{kw} s_{kw} \leq t_l + M \cdot (2 - s_{kw} - s_{lw}), \quad \forall l > k
 ```
