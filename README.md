@@ -18,7 +18,7 @@ using DagSchedulerViz
 
 plot_solution_report(g, c, γ, times, assignW, penalties, dfloads)
 ```
-![demo](demo.png)
+![Sample DAG](demoim.png)
 
 
 # Mathematical Formulation of the MILP Model for the DAG Scheduler
