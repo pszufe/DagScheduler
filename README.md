@@ -50,18 +50,18 @@ Minimize the following expression:
 
 ```math
     t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} \leq t_l, \quad \forall (k, l) \in edges(g)
-    p_{kl} \geq (s_{kw1} + s_{lw2} - 1) \cdot \gamma_{klw1w2}, \quad \forall (k, l), \forall w1 \neq w2
-```
 
+    p_{kl} \geq (s_{kw_1} + s_{lw_2} - 1) \cdot \gamma^{(k,l)}_{w_1,w_2}, \quad \forall (k, l) \in edges(g), \forall w_1 \neq w_2
+```
 
 
 3. **Last Task Timing:**
 
 ```math
-    t_l + \sum_{w=1}^W c_{lw} s_{lw} \leq t_{\text{last\_end}}, \quad \forall l : \text{outdegree}(g, l) = 0
+    t_l + \sum_{w=1}^W c_{lw} s_{lw} \leq t^{*}, \quad \forall l : \text{outdegree}(l) = 0
 ```
 
-4. **Sequential Task Execution:** If tasks \( k \) and \( l \) share the same worker, the task \( l \) occurs after task \( k \) if not linked by \( a_{kls \):
+4. **Sequential Task Execution:** If tasks $` k `$ and $` l `$ share the same worker, the task $` l`$ occurs after task $` k `$:
 
 ```math
     t_k + \sum_{w=1}^W c_{kw} s_{kw} \leq t_l + M \cdot (2 - s_{kw} - s_{lw}), \quad \forall l > k
