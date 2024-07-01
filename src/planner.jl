@@ -36,7 +36,7 @@ end
 
 
 function solve(g::AbstractGraph, c::AbstractMatrix{<:Real}, γ::AbstractMatrix{<:Real};
-     M::Real = ceil(Int,1.5*sum(maximum.(eachrow(c)))), Z::Real=10, rounding_digits::Integer=4)
+     M::Real = ceil(Int,1.5*sum(maximum.(eachrow(c)))), Z::Real=10, rounding_digits::Integer=4, optimizer=HiGHS.Optimizer)
      γ2= Dict{Tuple{Int,Int}, typeof(γ)}()
      for (i,j) in Tuple.(edges(g))
           γ2[(i, j)] = γ
@@ -65,7 +65,7 @@ Returns a `NamedTuple` with the following fields:
           * `execution_time` - total execution time of the DAG
 """
 function solve(g::AbstractGraph, c::AbstractMatrix{<:Real}, γ::Dict{Tuple{Int,Int}, <:AbstractMatrix{<:Real}};
-     M::Real = ceil(Int,1.5*sum(maximum.(eachrow(c)))), Z::Real=10, rounding_digits::Integer=4)
+     M::Real = ceil(Int,1.5*sum(maximum.(eachrow(c)))), Z::Real=10, rounding_digits::Integer=4, optimizer=HiGHS.Optimizer)
 
      K = nv(g)
      W = size(c,2)
@@ -79,7 +79,7 @@ function solve(g::AbstractGraph, c::AbstractMatrix{<:Real}, γ::Dict{Tuple{Int,I
      @assert !is_cyclic(g) "The DAG graph must be acyclic"
 
      a_kls =  Tuple.(edges(g))
-     m = Model(HiGHS.Optimizer)
+     m = Model(optimizer)
      JuMP.set_silent(m)
 
      @variable(m, t[1:K] >=0) #start time of each task
