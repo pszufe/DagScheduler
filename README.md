@@ -1,7 +1,15 @@
 ### DagScheduler
-by Przemyslaw Szufel & Julian Samaroo
 
-A library for optimal planning of tasks in a directed acyclic graph (DAG) with dependencies.
+Involved people:
+- Przemyslaw Szufel
+- Julian Samaroo
+- Guillaume Dalle
+
+
+[Discussion - planning Przemyslaw Szufel & Guillaume Dalle](notes.md)
+
+
+A WIP library for optimal planning of tasks in a directed acyclic graph (DAG) with dependencies.
 The library takes into consideration heterogenous distributed environment, where tasks are executed on multiple workers. The library takes into consideration heterogenous data transfer times between workers and tasks.
 
 Sample usage (see demo.jl for more details):
@@ -25,7 +33,7 @@ plot_solution_report(g, c, γ, times, assignW, penalties, dfloads)
 
 ## Variables:
 
-- $` t_k \geq 0 `$: Start time of each task $ k $, for $` k = 1, \ldots, K `$.
+- $` t_k \geq 0 `$: Start time of each task $k$, for $` k = 1, \ldots, K `$.
 - $` t^{*} \geq 0 `$: End time of the last task.
 - $` s_{kw} \in \{0,1\} `$: Binary variable that is 1 if task $` k `$ is assigned to worker $` w `$, for $` w = 1, \ldots, W `$.
 - $` p_{kl} \geq 0 `$: Penalties for moving between workers, applicable for task pairs $`(k, l)`$ (edges in the DAG).
