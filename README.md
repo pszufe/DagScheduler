@@ -3,7 +3,6 @@
 Involved people:
 - Przemyslaw Szufel
 - Julian Samaroo
-- Guillaume Dalle
 
 
 [Discussion - planning Przemyslaw Szufel & Guillaume Dalle](notes.md)
@@ -103,6 +102,7 @@ At any time point a task can be allocated to a worker when the amount of allocat
 - $` \gamma_{kl} \geq 0 `$: Penalties for moving between workers, applicable for task pairs $`(k, l)`$ (edges in the DAG).
 - $` c_{kw} \geq 0 `$:  a matrix with the times required to complete task $` k `$ on worker $` w `$
 - $` h_w^{(r)} `$: total quantity of resource  $` r `$ available on worker $` w `$ (could be RAM or CPU)
+- $` g_k^{(r)} `$: amount of resource  $` r `$ required to execute task $` k `$
 - $` Z `$: a factor for the importance of the total execution time in the optimization model
 - $` M `$: so called "big-M" - a large M number in the optimization model. Should be larger than the maximum possible execution time of the entire DAG
  
@@ -111,8 +111,11 @@ At any time point a task can be allocated to a worker when the amount of allocat
 - $` t_k \geq 0 `$: Start time of each task $k$, for $` k = 1, \ldots, K `$.
 - $` s_{kw} \in \{0,1\} `$: Binary variable that is 1 if task $` k `$ is assigned to worker $` w `$, for $` w = 1, \ldots, W `$.
 - $` p_{kl} \geq 0 `$: Applied penalties for moving between workers, applicable for task pairs $`(k, l)`$ (edges in the DAG).
-- $` 𝓣 = \{ T_1, T_2, \ldots, T_{2K} \} `$: time intervals such as $` T_1 \leq T_2 \leq \ldots \leq T_{2K} `$
-- $` b_{ku} \in \{0,1\} `$: the task $` k `$ overlaps with the time interval $` u `$, $` u = 1, \ldots, 2K `$
+- $` T_u =  T_1, T_2, \ldots, T_{2K}  `$: time intervals $` T_u \geq 0 `$
+- $` b_{ku} \in \{0,1\} `$: the task $` k `$ begins with the time interval $` u `$, $` u = 1, \ldots, 2K-1 `$
+- $` f_{ku} \in \{0,1\} `$: the task $` k `$ finishes with the time interval $` u `$, $` u = 2, \ldots, 2K `$
+- $` e_{ku} \in \{0,1\} `$: the task $` k `$ executes withn the time interval $` u `$ onwards, $` u = 1, \ldots, 2K-1 `$
+
 ## Objective:
 
 Minimize the following expression:
@@ -124,21 +127,47 @@ This function has two components: the total time to complete all tasks and total
 
 ## Constraints:
 
-1. **Timing constraint:** tasks are assigned to their intervals:
+1. **Timing constraint:** beginning of tasks are assigned to appropiate intervals:
 ```math
-   T_u \geq t_k - (1-b_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 1, \ldots, 2K
+   T_u \geq t_k - (1-b_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 1, \ldots, 2K-1
 ```
 ```math
-   T_u \leq t_k + (1-b_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 1, \ldots, 2K
+   T_u \leq t_k + (1-b_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 1, \ldots, 2K-1
 ```
 
-2. **Assignment Constraint:** Each task is coupled with at least one starting and one ending interval:
+2. **Timing constraint:** finishing points of tasks are assigned to appropiate intervals:
+```math
+   T_u \geq t_k + \sum_{w=1}^W c_{kw} s_{kw} - (1-f_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 2, \ldots, 2K
+```
+```math
+   T_u \leq t_k + \sum_{w=1}^W c_{kw} s_{kw} + (1-f_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 2, \ldots, 2K
+```
+
+3. **Interval assignment:** Each task $` k `$ has the begining and finishing times attached to one interval
+```math
+   \sum_{u=1}^{2K-1} b_{ku} = 1, \quad \forall k = 1, \ldots, K
+```
+```math
+   \sum_{u=2}^{2K} f_{ku} = 1, \quad \forall k = 1, \ldots, K
+```
+
+4. **Interval occupancy:** Task $` k `$'s execution occupies a given interval from the beginning to the finish (finish excluded)
+   
+```math
+   e_{ku} \geq b_{ku}, \quad \forall k = 1, \ldots, K, \forall u = 1, \ldots, 2K-1
+```
+```math
+   e_{ku} \geq e_{k,u-1} - f_{ku}, \quad \forall k = 1, \ldots, K, \forall u = 2, \ldots, 2K
+```
+5. **Worker availability:** Starting from interval $` u `$ worker utilization cannot exceed available resources
 
 ```math
-    \sum_{w=1}^W s_{kw} >= 1, \quad \forall k = 1, \ldots, K
+   \sum_{k}^{K}\sum_{u}^{2K-1} g_k^{(r)} e_{ku} \leq h_w^{(r)} , \quad \forall w = 1, \ldots, W, \forall r = 1, \ldots, R
 ```
-
-2. **Task Timing and Penalties:**
+ 
+ 
+ 
+6. **Task Timing and Penalties:**
 
 ```math
     t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} \leq t_l, \quad \forall (k, l) \in edges(g)
@@ -148,13 +177,7 @@ This function has two components: the total time to complete all tasks and total
 ```
 
 
-3. **Last Task Timing:**
-
-```math
-    t_l + \sum_{w=1}^W c_{lw} s_{lw} \leq t^{*}, \quad \forall l : \text{outdegree}(l) = 0
-```
-
-4. **Sequential Task Execution:** If tasks $` k `$ and $` l `$ share the same worker, the task $` l`$ occurs after task $` k `$:
+7. **Sequential Task Execution:** If tasks $` k `$ and $` l `$ share the same worker, the task $` l`$ occurs after task $` k `$:
 
 ```math
     t_k + \sum_{w=1}^W c_{kw} s_{kw} \leq t_l + M \cdot (2 - s_{kw} - s_{lw}), \quad \forall l > k
