@@ -124,7 +124,7 @@ Minimize the following expression:
 ```math
 \min Z \cdot T_{2K} + \sum_{(k,l) edges(g)} p_{kl}
 ```
-This function has two components: the total time to complete all tasks and total penalties for copying around the data.
+This function has two components: the total time to complete all tasks and total time penalties for copying around the data (if we want to avoild copying regardless of the total execution time).
 
 
 ## Constraints:
@@ -139,7 +139,7 @@ This function has two components: the total time to complete all tasks and total
 
 2. **Timing constraint:** finishing points of tasks are assigned to appropiate intervals:
 ```math
-   T_u \geq t_k + \sum_{w=1}^W c_{kw} s_{kw} - (1-f_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 2, \ldots, 2K
+   T_u \geq t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} - (1-f_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 2, \ldots, 2K
 ```
 ```math
    T_u \leq t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} + (1-f_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 2, \ldots, 2K
@@ -167,7 +167,7 @@ This function has two components: the total time to complete all tasks and total
    \sum_{k}^{K}\sum_{u}^{2K-1} g_k^{(r)} e_{ku} \leq h_w^{(r)} , \quad \forall w = 1, \ldots, W, \forall r = 1, \ldots, R
 ```
 
-6. **Switching penalty**: applied then connected tasks are executed on different workers
+6. **Switching time penalty**: Time $` p_{kl} `$ applied then connected tasks are executed on different workers
 ```math
     p_{kl} \geq (s_{kw_1} + s_{lw_2} - 1) \cdot \gamma^{(k,l)}_{w_1,w_2}, \quad \forall (k, l) \in edges(g), \forall w_1 \neq w_2
 ```
