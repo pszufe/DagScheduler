@@ -31,13 +31,20 @@ plot_solution_report(g, c, γ, times, assignW, penalties, dfloads)
 
 # Mathematical Formulation of the MILP Model for the DAG Scheduler
 
-## Variables:
+## Parameters:
+
+- $` \gamma_{kl} \geq 0 `$: Penalties for moving between workers, applicable for task pairs $`(k, l)`$ (edges in the DAG).
+- $` c_{kw} \geq 0 `$:  a matrix with the times required to complete task $` k `$ on worker $` w `$
+- $` Z `$: a factor for the importance of the total execution time in the optimization model
+- $` M `$: so called "big-M" - a large M number in the optimization model. Should be larger than the maximum possible execution time of the entire DAG
+ 
+## Decision Variables:
 
 - $` t_k \geq 0 `$: Start time of each task $k$, for $` k = 1, \ldots, K `$.
 - $` t^{*} \geq 0 `$: End time of the last task.
 - $` s_{kw} \in \{0,1\} `$: Binary variable that is 1 if task $` k `$ is assigned to worker $` w `$, for $` w = 1, \ldots, W `$.
-- $` p_{kl} \geq 0 `$: Penalties for moving between workers, applicable for task pairs $`(k, l)`$ (edges in the DAG).
-
+- $` p_{kl} \geq 0 `$: Applied penalties for moving between workers, applicable for task pairs $`(k, l)`$ (edges in the DAG).
+  
 ## Objective:
 
 Minimize the following expression:
