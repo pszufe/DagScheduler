@@ -89,8 +89,9 @@ Minimize the following expression:
 
 #  Extended MILP Model for the DAG Scheduler - includes parallel utilization of resources available at workers
 
-In this formulation workers are more like nodes - they can be shared in parallel across computing resources $` r = 1,\ldots,R$ `$.
-A  resource $` r `$ can be, for an example, the amount of CPU cores, RAM
+In this formulation workers are more like nodes or GPU accelarators. 
+A worker $` w `$  can be shared across many tasks exevuted in paraller as long as there are free computing resources $` r = 1,\ldots,R$ `$ available.
+A  resource $` r `$ can be, for an example, the amount of CPU cores, RAM or disk space.
 
 A worker $` w `$ has some number of avaialble resources $` h_w^{(r)} `$. On the other hand a task $` k `$ has a resource requirement `$ g_k^{(r)} $`.
 
@@ -101,8 +102,8 @@ At any time point a task can be allocated to a worker when the amount of allocat
 - $` k = 1, \ldots, K `$: $` K `$ jobs to be executed within the schedule 
 - $` \gamma_{kl} \geq 0 `$: Penalties for moving between workers, applicable for task pairs $`(k, l)`$ (edges in the DAG).
 - $` c_{kw} \geq 0 `$:  a matrix with the times required to complete task $` k `$ on worker $` w `$
-- $` h_w^{(r)} `$: total quantity of resource  $` r `$ available on worker $` w `$ (could be RAM or CPU)
 - $` g_k^{(r)} `$: amount of resource  $` r `$ required to execute task $` k `$
+- $` h_w^{(r)} `$: total quantity of resource  $` r `$ available on worker $` w `$ (could be RAM or CPU)
 - $` Z `$: a factor for the importance of the total execution time in the optimization model
 - $` M `$: so called "big-M" - a large M number in the optimization model. Should be larger than the maximum possible execution time of the entire DAG
  
