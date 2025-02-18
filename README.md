@@ -140,7 +140,7 @@ This function has two components: the total time to complete all tasks and total
    T_u \geq t_k + \sum_{w=1}^W c_{kw} s_{kw} - (1-f_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 2, \ldots, 2K
 ```
 ```math
-   T_u \leq t_k + \sum_{w=1}^W c_{kw} s_{kw} + (1-f_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 2, \ldots, 2K
+   T_u \leq t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} + (1-f_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 2, \ldots, 2K
 ```
 
 3. **Interval assignment:** Each task $` k `$ has the begining and finishing times attached to one interval
@@ -164,14 +164,14 @@ This function has two components: the total time to complete all tasks and total
 ```math
    \sum_{k}^{K}\sum_{u}^{2K-1} g_k^{(r)} e_{ku} \leq h_w^{(r)} , \quad \forall w = 1, \ldots, W, \forall r = 1, \ldots, R
 ```
- 
- 
- 
-6. **Task Timing and Penalties:**
 
-```math
-    t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} \leq t_l, \quad \forall (k, l) \in edges(g)
-```
+6. **Switching penalty**: applied then connected tasks are executed on different workers
 ```math
     p_{kl} \geq (s_{kw_1} + s_{lw_2} - 1) \cdot \gamma^{(k,l)}_{w_1,w_2}, \quad \forall (k, l) \in edges(g), \forall w_1 \neq w_2
+```
+ 
+ 
+7. **Task timing sequence:** corresponing the DAG graph `g` and taking considaration of switching penalty
+```math
+    t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} \leq t_l, \quad \forall (k, l) \in edges(g)
 ```
