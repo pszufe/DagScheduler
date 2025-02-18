@@ -90,12 +90,13 @@ Minimize the following expression:
 #  Extended MILP Model for the DAG Scheduler - includes parallel utilization of resources available at workers
 
 In this formulation workers are more like nodes or GPU accelarators. 
-A worker $` w `$  can be shared across many tasks exevuted in paraller as long as there are free computing resources $` r = 1,\ldots,R$ `$ available.
-A  resource $` r `$ can be, for an example, the amount of CPU cores, RAM or disk space.
 
-A worker $` w `$ has some number of avaialble resources $` h_w^{(r)} `$. On the other hand a task $` k `$ has a resource requirement `$ g_k^{(r)} $`.
+A worker $` w `$  can be shared across many tasks executed in paraller as long as there are free computing resources available for those tasks.
+A  computing resource $` r `$, $` r = 1, \ldots, R `$ can be, for an example, the amount of CPU cores, RAM or disk space.
 
-At any time point a task can be allocated to a worker when the amount of allocated does not exceed the amount of available resources.
+A worker $` w `$ has some number of avaialble resources $` h_w^{(r)} `$. On the other hand a task $` k `$ has a resource requirement $` g_k^{(r)} `$.
+
+At any time point $` T_u `$ a task $` k `$ can be allocated to a worker when the amount of total allocated resources on that worker does not exceed the amount of available resources.
 
 ## Parameters:
 
