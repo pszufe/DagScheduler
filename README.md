@@ -170,7 +170,7 @@ This function has two components: the total time to complete all tasks and total
 ```
 
 ```math
-   \sum_{k=1}^{K} E_{kuw} \cdot g_{kw}^{(r)}    \leq h_w^{(r)}  \qquad \forall u = 1,\ldots,2K-1; \forall w = 1,\ldots,W; \forall r = 1,\ldots,R
+   \sum_{k=1}^{K} E_{kuw} g_{kw}^{(r)}    \leq h_w^{(r)}  \qquad \forall u = 1,\ldots,2K-1; \forall w = 1,\ldots,W; \forall r = 1,\ldots,R
 ```
 
 6. **Switching time penalty**: Time $` p_{kl} `$ applied then connected tasks are executed on different computing units
