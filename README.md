@@ -87,33 +87,43 @@ Minimize the following expression:
 
 
 
-#  Extended MILP Model for the DAG Scheduler - includes parallel utilization of resources available at workers
+#  Extended MILP Model for the DAG Scheduler - includes parallel utilization of resources available at computing units
 
-In this formulation workers are more like nodes or GPU accelarators. 
+In this formulation computing units are more like nodes or GPU accelarators. 
 
-A worker $` w `$  can be shared across many tasks executed in paraller as long as there are free computing resources available for those tasks.
+Computing unit can run several tasks in parallel
+Computing unit can be either GPU+GPU mem or   CPU + RAM (resources)
+
+Each tasks has requirement for resources:
+10 CPU cores and 20GB RAM 
+
+CU: 20 cores 64GB RAM 
+
+
+
+A computing unit $` w `$  can be shared across many tasks executed in paraller as long as there are free computing resources available for those tasks.
 A  computing resource $` r `$, $` r = 1, \ldots, R `$ can be, for an example, the amount of CPU cores, RAM or disk space.
 
-A worker $` w `$ has some number of avaialble resources $` h_w^{(r)} `$. On the other hand a task $` k `$ has a resource requirement $` g_k^{(r)} `$.
+A computing unit $` w `$ has some number of avaialble resources $` h_w^{(r)} `$. On the other hand a task $` k `$ has a resource requirement $` g_k^{(r)} `$.
 
-At any time point $` T_u `$ a task $` k `$ can be allocated to a worker when the amount of total allocated resources on that worker does not exceed the amount of available resources.
+At any time point $` T_u `$ a task $` k `$ can be allocated to a computing unit when the amount of total allocated resources on that computing unit does not exceed the amount of available resources.
 
 ## Parameters:
 
-- $` k = 1, \ldots, K `$: $` K `$ jobs to be executed within the schedule 
-- $` \gamma_{kl} \geq 0 `$: Penalties for moving between workers, applicable for task pairs $`(k, l)`$ (edges in the DAG).
-- $` c_{kw} \geq 0 `$:  a matrix with the times required to complete task $` k `$ on worker $` w `$
+- $` k = 1, \ldots, K `$: $` K `$ tasks to be executed within the schedule 
+- $` \gamma^{(k,l)}_{w_1,w_2} \geq 0 `$: Penalties for moving between computing units, applicable for task pairs $`(k, l)`$ (edges in the DAG).
+- $` c_{kw} \geq 0 `$:  a matrix with the times required to complete task $` k `$ on computing unit $` w `$
 - $` g_k^{(r)} `$: amount of resource  $` r `$ required to execute task $` k `$
-- $` h_w^{(r)} `$: total quantity of resource  $` r `$ available on worker $` w `$ (could be RAM or CPU)
+- $` h_w^{(r)} `$: total quantity of resource  $` r `$ available on computing unit $` w `$ (could be RAM or CPU)
 - $` Z `$: a factor for the importance of the total execution time in the optimization model
 - $` M `$: so called "big-M" - a large M number in the optimization model. Should be larger than the maximum possible execution time of the entire DAG
  
 ## Decision Variables:
 
 - $` t_k \geq 0 `$: Start time of each task $k$, for $` k = 1, \ldots, K `$.
-- $` s_{kw} \in \{0,1\} `$: Binary variable that is 1 if task $` k `$ is assigned to worker $` w `$, for $` w = 1, \ldots, W `$.
-- $` p_{kl} \geq 0 `$: Applied penalties for moving between workers, applicable for task pairs $`(k, l)`$ (edges in the DAG).
-- $` T_u =  T_1, T_2, \ldots, T_{2K}  `$: time intervals $` T_u \geq 0 `$
+- $` s_{kw} \in \{0,1\} `$: Binary variable that is 1 if task $` k `$ is assigned to computing unit $` w `$, for $` w = 1, \ldots, W `$.
+- $` p_{kl} \geq 0 `$: Applied penalties for moving between computing units, applicable for task pairs $`(k, l)`$ (edges in the DAG).
+- $` T_u =  T_1, T_2, \ldots, T_{2K}  `$: time intervals $` T_u \geq 0 `$, $` 0 \leq T_1 \leq T_2 \leq \ldots \leq T_{2K}  `$:
 - $` b_{ku} \in \{0,1\} `$: the task $` k `$ begins with the time interval $` u `$, $` u = 1, \ldots, 2K-1 `$
 - $` f_{ku} \in \{0,1\} `$: the task $` k `$ finishes with the time interval $` u `$, $` u = 2, \ldots, 2K `$
 - $` e_{ku} \in \{0,1\} `$: the task $` k `$ executes withn the time interval $` u `$ onwards, $` u = 1, \ldots, 2K-1 `$
@@ -161,13 +171,13 @@ This function has two components: the total time to complete all tasks and total
 ```math
    e_{ku} \geq e_{k,u-1} - f_{ku}, \quad \forall k = 1, \ldots, K, \forall u = 2, \ldots, 2K
 ```
-5. **Worker availability:** Starting from interval $` u `$ worker utilization cannot exceed available resources
+5. **computing unit availability:** Starting from interval $` u `$ computing unit utilization cannot exceed available resources
 
 ```math
    \sum_{k}^{K}\sum_{u}^{2K-1} g_k^{(r)} e_{ku} \leq h_w^{(r)} , \quad \forall w = 1, \ldots, W, \forall r = 1, \ldots, R
 ```
 
-6. **Switching time penalty**: Time $` p_{kl} `$ applied then connected tasks are executed on different workers
+6. **Switching time penalty**: Time $` p_{kl} `$ applied then connected tasks are executed on different computing units
 ```math
     p_{kl} \geq (s_{kw_1} + s_{lw_2} - 1) \cdot \gamma^{(k,l)}_{w_1,w_2}, \quad \forall (k, l) \in edges(g), \forall w_1 \neq w_2
 ```
