@@ -119,7 +119,7 @@ At any time point $` T_u `$ a task $` k `$ can be allocated to a computing unit 
 - $` b_{ku} \in \{0,1\} `$: the task $` k `$ begins with the time interval $` u `$, $` u = 1,\ldots,2K-1 `$
 - $` f_{ku} \in \{0,1\} `$: the task $` k `$ finishes with the time interval $` u `$, $` u = 2,\ldots,2K `$
 - $` e_{ku} \in \{0,1\} `$: the task $` k `$ executes within the time interval $` u `$ onwards, $` u = 1,\ldots,2K-1 `$
-- $` E_{kuw} \in \{0,1\} `$: the task $` k `$ executes on the copnputing unit $` w `$ within the time interval $` u `$ onwards, $` u = 1,\ldots,2K-1 `$
+- $` E_{kuw} \in \{0,1\} `$: the task $` k `$ executes within the time interval $` u `$ onwards on the computing unit $` w `$ 
 
 ## Objective:
 
