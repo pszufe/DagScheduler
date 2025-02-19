@@ -58,29 +58,29 @@ Minimize the following expression:
 1. **Assignment Constraint:** Each task is assigned to exactly one worker:
 
 ```math
-    \sum_{w=1}^W s_{kw} = 1, \quad \forall k = 1, \ldots, K
+    \sum_{w=1}^W s_{kw} = 1 \qquad \forall k = 1, \ldots, K
 ```
 
 2. **Task Timing and Penalties:**
 
 ```math
-    t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} \leq t_l, \quad \forall (k, l) \in edges(g)
+    t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} \leq t_l \qquad \forall (k, l) \in edges(g)
 ```
 ```math
-    p_{kl} \geq (s_{kw_1} + s_{lw_2} - 1) \cdot \gamma^{(k,l)}_{w_1,w_2}, \quad \forall (k, l) \in edges(g), \forall w_1 \neq w_2
+    p_{kl} \geq (s_{kw_1} + s_{lw_2} - 1) \cdot \gamma^{(k,l)}_{w_1,w_2} \qquad \forall (k, l) \in edges(g); \forall w_1 \neq w_2
 ```
 
 
 3. **Last Task Timing:**
 
 ```math
-    t_l + \sum_{w=1}^W c_{lw} s_{lw} \leq t^{*}, \quad \forall l : \text{outdegree}(l) = 0
+    t_l + \sum_{w=1}^W c_{lw} s_{lw} \leq t^{*} \qquad \forall l : \text{outdegree}(l) = 0
 ```
 
 4. **Sequential Task Execution:** If tasks $` k `$ and $` l `$ share the same worker, the task $` l`$ occurs after task $` k `$:
 
 ```math
-    t_k + \sum_{w=1}^W c_{kw} s_{kw} \leq t_l + M \cdot (2 - s_{kw} - s_{lw}), \quad \forall l > k
+    t_k + \sum_{w=1}^W c_{kw} s_{kw} \leq t_l + M \cdot (2 - s_{kw} - s_{lw}) \qquad \forall l > k
 ```
 
 
@@ -89,22 +89,14 @@ Minimize the following expression:
 
 #  Extended MILP Model for the DAG Scheduler - includes parallel utilization of resources available at computing units
 
-In this formulation computing units are more like nodes or GPU accelarators. 
+In this formulation we are using computing units (CU) which are more like nodes or GPU accelarators. 
 
-Computing unit can run several tasks in parallel
-Computing unit can be either GPU+GPU mem or   CPU + RAM (resources)
-
-Each tasks has requirement for resources:
-10 CPU cores and 20GB RAM 
-
-CU: 20 cores 64GB RAM 
-
-
+A computing unit can run several tasks in parallel. A computing unit can be very heterogenous. CU can be either a CPU with RAM and disk space or a  GPU with video RAM.
 
 A computing unit $` w `$  can be shared across many tasks executed in paraller as long as there are free computing resources available for those tasks.
 A  computing resource $` r `$, $` r = 1, \ldots, R `$ can be, for an example, the amount of CPU cores, RAM or disk space.
 
-A computing unit $` w `$ has some number of avaialble resources $` h_w^{(r)} `$. On the other hand a task $` k `$ has a resource requirement $` g_k^{(r)} `$.
+A computing unit $` w `$ has some number of avaialble resources $` h_w^{(r)} `$. On the other hand a task $` k `$ has a copmpute-unit-specific resource requirement $` g_{kw}^{(r)} `$.
 
 At any time point $` T_u `$ a task $` k `$ can be allocated to a computing unit when the amount of total allocated resources on that computing unit does not exceed the amount of available resources.
 
@@ -113,7 +105,7 @@ At any time point $` T_u `$ a task $` k `$ can be allocated to a computing unit 
 - $` k = 1, \ldots, K `$: $` K `$ tasks to be executed within the schedule 
 - $` \gamma^{(k,l)}_{w_1,w_2} \geq 0 `$: Penalties for moving between computing units, applicable for task pairs $`(k, l)`$ (edges in the DAG).
 - $` c_{kw} \geq 0 `$:  a matrix with the times required to complete task $` k `$ on computing unit $` w `$
-- $` g_k^{(r)} `$: amount of resource  $` r `$ required to execute task $` k `$
+- $` g_{kw}^{(r)} `$: amount of resource  $` r `$ required to execute task $` k `$ on computing unit $` w `$
 - $` h_w^{(r)} `$: total quantity of resource  $` r `$ available on computing unit $` w `$ (could be RAM or CPU)
 - $` Z `$: a factor for the importance of the total execution time in the optimization model
 - $` M `$: so called "big-M" - a large M number in the optimization model. Should be larger than the maximum possible execution time of the entire DAG
@@ -126,7 +118,8 @@ At any time point $` T_u `$ a task $` k `$ can be allocated to a computing unit 
 - $` T_u =  T_1, T_2, \ldots, T_{2K}  `$: time intervals $` T_u \geq 0 `$, $` 0 \leq T_1 \leq T_2 \leq \ldots \leq T_{2K}  `$:
 - $` b_{ku} \in \{0,1\} `$: the task $` k `$ begins with the time interval $` u `$, $` u = 1, \ldots, 2K-1 `$
 - $` f_{ku} \in \{0,1\} `$: the task $` k `$ finishes with the time interval $` u `$, $` u = 2, \ldots, 2K `$
-- $` e_{ku} \in \{0,1\} `$: the task $` k `$ executes withn the time interval $` u `$ onwards, $` u = 1, \ldots, 2K-1 `$
+- $` e_{ku} \in \{0,1\} `$: the task $` k `$ executes within the time interval $` u `$ onwards, $` u = 1, \ldots, 2K-1 `$
+- $` E_{kuw} \in \{0,1\} `$: the task $` k `$ executes on the copnputing unit $` w `$ within the time interval $` u `$ onwards, $` u = 1, \ldots, 2K-1 `$
 
 ## Objective:
 
@@ -141,49 +134,52 @@ This function has two components: the total time to complete all tasks and total
 
 1. **Timing constraint:** beginning of tasks are assigned to appropiate intervals:
 ```math
-   T_u \geq t_k - (1-b_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 1, \ldots, 2K-1
+   T_u \geq t_k - (1-b_{ku})M \qquad \forall k = 1, \ldots, K; \forall u = 1, \ldots, 2K-1
 ```
 ```math
-   T_u \leq t_k + (1-b_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 1, \ldots, 2K-1
+   T_u \leq t_k + (1-b_{ku})M \qquad \forall k = 1, \ldots, K; \forall u = 1, \ldots, 2K-1
 ```
 
 2. **Timing constraint:** finishing points of tasks are assigned to appropiate intervals:
 ```math
-   T_u \geq t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} - (1-f_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 2, \ldots, 2K
+   T_u \geq t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} - (1-f_{ku})M \qquad \forall k = 1, \ldots, K; \forall u = 2, \ldots, 2K
 ```
 ```math
-   T_u \leq t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} + (1-f_{ku})M, \quad \forall k = 1, \ldots, K, \forall u = 2, \ldots, 2K
+   T_u \leq t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} + (1-f_{ku})M \qquad \forall k = 1, \ldots, K; \forall u = 2, \ldots, 2K
 ```
 
 3. **Interval assignment:** Each task $` k `$ has the begining and finishing times attached to one interval
 ```math
-   \sum_{u=1}^{2K-1} b_{ku} = 1, \quad \forall k = 1, \ldots, K
+   \sum_{u=1}^{2K-1} b_{ku} = 1 \qquad \forall k = 1, \ldots, K
 ```
 ```math
-   \sum_{u=2}^{2K} f_{ku} = 1, \quad \forall k = 1, \ldots, K
+   \sum_{u=2}^{2K} f_{ku} = 1 \qquad \forall k = 1, \ldots, K
 ```
 
 4. **Interval occupancy:** Task $` k `$'s execution occupies a given interval from the beginning to the finish (finish excluded)
    
 ```math
-   e_{ku} \geq b_{ku}, \quad \forall k = 1, \ldots, K, \forall u = 1, \ldots, 2K-1
+   e_{ku} \geq b_{ku} \qquad \forall k = 1, \ldots, K; \forall u = 1, \ldots, 2K-1
 ```
 ```math
-   e_{ku} \geq e_{k,u-1} - f_{ku}, \quad \forall k = 1, \ldots, K, \forall u = 2, \ldots, 2K
+   e_{ku} \geq e_{k,u-1} - f_{ku} \qquad \forall k = 1, \ldots, K; \forall u = 2, \ldots, 2K
 ```
 5. **computing unit availability:** Starting from interval $` u `$ computing unit utilization cannot exceed available resources
+```math
+   E_{kuw} \geq  e_{ku} + s_{kw} - 1  \qquad \forall u = 1, \ldots, 2K-1; \forall w = 1, \ldots, W; \forall w = 1, \ldots, W
+```
 
 ```math
-   \sum_{k}^{K}\sum_{u}^{2K-1} g_k^{(r)} e_{ku} \leq h_w^{(r)} , \quad \forall w = 1, \ldots, W, \forall r = 1, \ldots, R
+   \sum_{k}^{K} E_{kuw} \cdot g_{kw}^{(r)}    \leq h_w^{(r)}  \qquad \forall u = 1, \ldots, 2K-1; \forall w = 1, \ldots, W; \forall r = 1, \ldots, R
 ```
 
 6. **Switching time penalty**: Time $` p_{kl} `$ applied then connected tasks are executed on different computing units
 ```math
-    p_{kl} \geq (s_{kw_1} + s_{lw_2} - 1) \cdot \gamma^{(k,l)}_{w_1,w_2}, \quad \forall (k, l) \in edges(g), \forall w_1 \neq w_2
+    p_{kl} \geq (s_{kw_1} + s_{lw_2} - 1) \cdot \gamma^{(k,l)}_{w_1,w_2} \qquad \forall (k, l) \in edges(g); \forall w_1 \neq w_2
 ```
  
  
 7. **Task timing sequence:** corresponing the DAG graph `g` and taking considaration of switching penalty
 ```math
-    t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} \leq t_l, \quad \forall (k, l) \in edges(g)
+    t_k + \sum_{w=1}^W c_{kw} s_{kw} + p_{kl} \leq t_l \qquad \forall (k, l) \in edges(g)
 ```
